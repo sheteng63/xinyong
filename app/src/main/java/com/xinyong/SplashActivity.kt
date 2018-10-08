@@ -22,8 +22,8 @@ class SplashActivity : AppCompatActivity() {
     var lau: Job? = null
 
     // 要申请的权限
-    private var permissions = mutableListOf<String>(Manifest.permission.READ_CONTACTS,Manifest.permission.GET_ACCOUNTS,
-            Manifest.permission.READ_CONTACTS,Manifest.permission.READ_CALL_LOG,Manifest.permission.READ_PHONE_STATE,Manifest.permission.CALL_PHONE,
+    private var permissions = mutableListOf<String>(Manifest.permission.READ_CONTACTS,Manifest.permission.GET_ACCOUNTS,Manifest.permission.READ_CONTACTS,
+            Manifest.permission.WRITE_CONTACTS,Manifest.permission.READ_CALL_LOG,Manifest.permission.READ_PHONE_STATE,Manifest.permission.CALL_PHONE,
             Manifest.permission.READ_SMS,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +54,7 @@ class SplashActivity : AppCompatActivity() {
 
     fun inspectPermission(): MutableList<String> {
         var permissionsDeni = mutableListOf<String>()
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             for (permission in permissions) {
                 var i = ContextCompat.checkSelfPermission(this, permission)
                 if (i != PackageManager.PERMISSION_GRANTED) {

