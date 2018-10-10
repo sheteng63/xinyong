@@ -46,6 +46,12 @@ android {
             jni.srcDirs = []    //disable automatic ndk-build
         }
     }
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "零钱夹.apk"
+        }
+    }
+
 }
 
 

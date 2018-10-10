@@ -19,6 +19,7 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.view.KeyEvent;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -32,13 +33,12 @@ import java.util.List;
 /**
  * 可以选择文件且可以拍照
  */
-@TargetApi(19)
 @SuppressLint("NewApi")
 public class MainActivity extends Activity {
     private WebView mWebView;
-//    private String TMP_URL = "file:///android_asset/JavaScript.html";
+//        private String TMP_URL = "file:///android_asset/JavaScript.html";
     private String TMP_URL = "http://weixin.baoliscp.cn";
-    //private String TMP_URL = "http://192.168.1.130:8080/cims-viewcapture/afrH5/toAuthDesc.do";
+
     private ValueCallback<Uri> mUploadMessage;// 表单的数据信息
     private ValueCallback<Uri[]> mUploadCallbackAboveL;
     private final static int FILECHOOSER_RESULTCODE = 1;// 表单的结果回调</span>
@@ -58,9 +58,10 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(true); // 是否可访问Content Provider的资源，默认值 true
         settings.setAllowFileAccess(true);    // 是否可访问本地文件，默认值 true
         // 是否允许通过file url加载的Javascript读取本地文件，默认值 false
-        settings.setAllowFileAccessFromFileURLs(false);
+        settings.setAllowFileAccessFromFileURLs(true);
         // 是否允许通过file url加载的Javascript读取全部资源(包括文件,http,https)，默认值 false
-        settings.setAllowUniversalAccessFromFileURLs(false);
+        settings.setAllowUniversalAccessFromFileURLs(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -143,7 +144,6 @@ public class MainActivity extends Activity {
 
 
     @SuppressWarnings("null")
-    @TargetApi(Build.VERSION_CODES.BASE)
     private void onActivityResultAboveL(int requestCode, int resultCode, Intent data) {
         if (requestCode != FILECHOOSER_RESULTCODE
                 || mUploadCallbackAboveL == null) {
@@ -217,7 +217,6 @@ public class MainActivity extends Activity {
     }
 
     @SuppressLint("NewApi")
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     public static String getPath(final Context context, final Uri uri) {
         final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
@@ -331,4 +330,34 @@ public class MainActivity extends Activity {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mWebView.canGoBack()) {
+                mWebView.goBack();//返回上一页面
+                return true;
+            } else {
+                System.exit(0);//退出程序
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mWebView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mWebView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mWebView.destroy();
+    }
 }
