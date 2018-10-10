@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Carson</title>
+    <script>
+
+
+         function callAndroid(){
+               window.android.getToken('13052235265')
+         }
+
+    </script>
+</head>
+<body>
+//点击按钮则调用callAndroid函数
+<div class="item">
+            <img class="addImg" onclick="clickImg(this);" src="../../img/ioc/jindu1.png" />
+            <input name="url" type="file" class="upload_input" accept="image/*" multiple onchange="change(this,0)"/>
+            <div class="preBlock">
+                <img class="preview" id="preview" alt="" name="pic" width="190" height="190" />
+            </div>
+            <img class="delete" onclick="deleteImg(this)" src="../../img/ioc/feed.png"/>
+        </div>
+<button type="button" id="button1" onclick="callAndroid()"></button>
+</body>
+</html>

